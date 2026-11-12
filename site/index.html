@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Busy Light — управление цветами</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      --top-color: #ff0000;
+      --front-color: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% -15%, #233759, #101827 58%);
+      color: #f8fafc;
+    }
+    main { width: min(calc(100% - 32px), 520px); margin: 0 auto; padding: 36px 0 56px; }
+    .eyebrow { color: #93c5fd; font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 8px 0; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.05; }
+    .intro { margin: 0 0 26px; color: #cbd5e1; line-height: 1.5; }
+    .card { background: #1b2940; border: 1px solid #3a4e6b; border-radius: 22px; box-shadow: 0 20px 48px #0004; }
+    .preview { padding: 32px 24px 24px; text-align: center; }
+    .connection { display: flex; align-items: center; gap: 16px; padding: 18px 20px; margin-bottom: 18px; }
+    .connection p { margin: 0; color: #cbd5e1; line-height: 1.4; font-size: .9rem; }
+    .connection button { color: #07111f; background: #93c5fd; border-color: #93c5fd; font-weight: 700; }
+    .connection button:disabled { opacity: .6; cursor: progress; }
+    .hint { margin: -7px 2px 18px; color: #a9bdd8; font-size: .85rem; line-height: 1.4; }
+    .device { position: relative; width: 208px; height: 232px; margin: auto; border: 3px solid #69809e; border-radius: 50% 50% 32% 32%; background: linear-gradient(155deg, #3c506b, #1c2b40); box-shadow: inset 0 4px 10px #fff2, 0 15px 30px #0007; }
+    .top-light { position: absolute; top: 31px; left: calc(50% - 20px); width: 40px; height: 40px; border: 4px solid #b3c0d0; border-radius: 50%; background: var(--top-color); box-shadow: 0 0 22px var(--top-color), 0 0 42px var(--top-color); transition: background .2s, box-shadow .2s; }
+    .front-lights { position: absolute; left: 17px; right: 17px; bottom: 45px; display: flex; justify-content: space-between; }
+    .pixel { width: 25px; height: 25px; border: 3px solid #b3c0d0; border-radius: 50%; background: var(--front-color); box-shadow: 0 0 14px var(--front-color); }
+    .device.busy .pixel { animation: chase 1.56s steps(1, end) infinite; }
+    .device.busy .pixel:nth-child(2) { animation-delay: .26s; }
+    .device.busy .pixel:nth-child(3) { animation-delay: .52s; }
+    .device.busy .pixel:nth-child(4) { animation-delay: .78s; }
+    .device.busy .pixel:nth-child(5) { animation-delay: 1.04s; }
+    .device.docked .top-light { background: #334155; box-shadow: none; }
+    @keyframes chase { 0%, 18% { opacity: .15; box-shadow: none; } 19%, 100% { opacity: 1; box-shadow: 0 0 14px var(--front-color); } }
+    .mode { display: inline-flex; align-items: center; gap: 11px; margin-top: 24px; color: #dbeafe; font-weight: 600; cursor: pointer; }
+    .mode input { width: 19px; height: 19px; accent-color: #60a5fa; }
+    .mode-text { display: block; margin: 10px 0 0; min-height: 1.5em; color: #a9bdd8; font-size: .9rem; }
+    .controls { display: grid; gap: 14px; margin-top: 18px; }
+    .control { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 20px; }
+    .control label { display: block; font-weight: 700; }
+    .control small { display: block; margin-top: 4px; color: #a9bdd8; }
+    input[type=color] { width: 72px; height: 52px; padding: 2px; border: 1px solid #7086a4; border-radius: 12px; background: #273b57; cursor: pointer; }
+    .actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 18px; }
+    .note { margin: 0; color: #a9bdd8; font-size: .85rem; line-height: 1.4; }
+    button { flex: none; padding: 10px 15px; border: 1px solid #7086a4; border-radius: 10px; color: #e2e8f0; background: #273b57; font: inherit; cursor: pointer; }
+    button:hover, button:focus-visible { background: #345273; }
+    @media (max-width: 460px) { .connection { align-items: stretch; flex-direction: column; } .actions { align-items: flex-start; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { .device.busy .pixel { animation: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Управление по Bluetooth</div>
+    <h1>Busy Light</h1>
+    <p class="intro">Подключите светильник по Bluetooth и выберите цвета верхнего индикатора и пяти передних светодиодов.</p>
+
+    <section class="card connection" aria-label="Подключение к светильнику">
+      <button id="connect" type="button">Подключить устройство</button>
+      <p id="connectionStatus" role="status">Сначала включите ESP32-C6, затем нажмите «Подключить устройство».</p>
+    </section>
+    <p class="hint">Если рядом несколько плат с именем BusyLight-C6, на время подключения включите только нужную.</p>
+
+    <section class="card preview" aria-label="Предпросмотр светильника">
+      <div id="device" class="device docked" aria-hidden="true">
+        <div class="top-light"></div>
+        <div class="front-lights">
+          <span class="pixel"></span><span class="pixel"></span><span class="pixel"></span><span class="pixel"></span><span class="pixel"></span>
+        </div>
+      </div>
+      <label class="mode"><input id="busy" type="checkbox"> Наушники сняты</label>
+      <p id="modeText" class="mode-text">Концевик нажат: верхний индикатор выключен.</p>
+    </section>
+
+    <div class="controls">
+      <section class="card control">
+        <div><label for="top">Верхний индикатор</label><small id="topValue">#FF0000</small></div>
+        <input id="top" type="color" value="#ff0000" aria-label="Цвет верхнего индикатора">
+      </section>
+      <section class="card control">
+        <div><label for="front">Пять передних светодиодов</label><small id="frontValue">#FFFFFF</small></div>
+        <input id="front" type="color" value="#ffffff" aria-label="Цвет передних светодиодов">
+      </section>
+    </div>
+    <div class="actions">
+      <p class="note">Без подключения можно смотреть предпросмотр. После подключения цвета передаются на ESP. Переключатель «Наушники сняты» меняет только предпросмотр; физический концевик работает сам.</p>
+      <button id="reset" type="button">Сбросить</button>
+    </div>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>

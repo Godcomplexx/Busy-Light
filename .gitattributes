@@ -1,0 +1,8 @@
+*.py text eol=lf
+*.ino text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+firmware_deploy.bin binary

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.idea/
+.vscode/
+*.log
+*.tmp
+*.bak
+*_backup.bin
+*_dump.bin
+before_*.bin
+nvs_*.bin
+Thumbs.db
+.DS_Store
+
+# Keep the deploy image in version control; keep device dumps outside this folder.
