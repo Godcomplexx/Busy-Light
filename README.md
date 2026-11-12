@@ -18,6 +18,8 @@ This project contains an editable Arduino sketch, a complete firmware image, and
 
 Firmware SHA-256: `701F81CAD26FCD519F9DD7E45266E4719494BAB231FEA078B0CAB5BADF4E3267`. `flash.py` checks this hash before writing.
 
+The bundled image was built from the included sketch with blank device-data partitions. It contains no saved settings copied from the original board.
+
 ## Flash a Board
 
 Install Python 3. Open a terminal in this folder and install esptool once:
@@ -128,9 +130,3 @@ py build.py
 `build.py` checks that the BLE UUIDs in the sketch and web page match, remaps local user paths during compilation, checks that device-data partitions are blank, writes `firmware_deploy.bin`, and updates its SHA-256 in `flash.py` and this README. If Arduino CLI is not on `PATH`, pass its executable with `--arduino-cli`.
 
 To check the browser connection logic during development, run `node --test tests/site.test.mjs` with Node.js 20 or newer. This test does not require a physical ESP32-C6.
-
-## Privacy and Validation
-
-This image was compiled afresh from the included sketch. Its NVS and SPIFFS partitions are blank. At runtime, NVS stores the selected LED colors and system radio data. Source-path remapping was used during compilation so the Windows account name is not embedded. A static check found no original-board MAC address or user path in the release image. The original device dump and photographs are stored separately and are **not** part of this folder.
-
-On November 12, 2026, the BLE firmware was tested on the original ESP32-C6: a Windows BLE client read and wrote both colors, a second connection succeeded, and the user confirmed that changing a color from the localhost page changed the light. The audited image was then rebuilt, flashed, and verified on the same board. Its prior NVS settings were restored from a separate backup. After the final flash, the user confirmed that the localhost page read the restored top color `#3300FF` and front color `#AC2020` and still changed both lights. The published GitHub Pages URL served the HTML and JavaScript over HTTPS, and the user confirmed that it connected to the board and changed the LED colors. Flashing a second physical board has not yet been tested.
