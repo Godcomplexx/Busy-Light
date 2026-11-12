@@ -1,28 +1,25 @@
-# Busy Light Firmware for XIAO ESP32-C6
+# Busy Light
 
-This project contains an editable Arduino sketch, a complete firmware image, and a static Web Bluetooth controller for the **Seeed Studio XIAO ESP32-C6 with 4 MB of flash**. A compatible browser can find a nearby board, connect over Bluetooth Low Energy (BLE), and set the top indicator and five front LEDs independently. The color controls need no Wi-Fi network, account, or cable after the initial USB flash.
+**A Bluetooth-controlled light for a headphone stand.**
 
-**Live controller:** https://godcomplexx.github.io/Busy-Light/
+Busy Light runs on a **Seeed Studio XIAO ESP32-C6 with 4 MB of flash**. A microswitch detects the headphones, one LED shows the stand's status, and five front LEDs animate. Use the browser controller to choose both colors independently. After the initial USB flash, color control needs no cable or Wi-Fi network.
 
-## Files
+**[Open the live controller](https://godcomplexx.github.io/Busy-Light/)** · [Flash a board](#flash-a-board) · [See the wiring](#wiring)
 
-- `BusyLight/BusyLight.ino` — editable application source code.
-- `firmware_deploy.bin` — complete 4 MB flash image built from that source.
-- `build.py` — privacy-aware firmware builder.
-- `flash.py` — Python script that checks a board, writes the image, and verifies it.
-- `requirements.txt` — `esptool==5.3.0` for flashing.
-- `site/index.html` and `site/app.js` — static Web Bluetooth page for localhost or GitHub Pages.
-- `.github/workflows/pages.yml` — publishes only the `site` folder to GitHub Pages when this project is pushed to a repository's default branch.
-- `.gitignore` and `.gitattributes` — keep temporary files out of Git and mark the firmware image as binary.
-- `tests/site.test.mjs` — checks browser state when Bluetooth connections change; runs with Node.js and no npm packages.
+## Contents
 
-Firmware SHA-256: `701F81CAD26FCD519F9DD7E45266E4719494BAB231FEA078B0CAB5BADF4E3267`. `flash.py` checks this hash before writing.
-
-The bundled image was built from the included sketch with blank device-data partitions. It contains no saved settings copied from the original board.
+- [Flash a board](#flash-a-board)
+- [Change colors](#change-colors-over-bluetooth)
+- [Wiring](#wiring)
+- [Test the finished light](#test-after-flashing)
+- [Run the web page locally](#open-the-page-on-localhost)
+- [Publish the page](#publish-on-github-pages)
+- [Rebuild from source](#rebuild-from-source)
+- [Project files](#project-files)
 
 ## Flash a Board
 
-Install Python 3. Open a terminal in this folder and install esptool once:
+Download this repository as a ZIP or clone it, then open a terminal in the project folder. Install Python 3 and esptool once:
 
 ```powershell
 py -m pip install -r requirements.txt
@@ -63,22 +60,6 @@ The top indicator defaults to red; the front LEDs default to white. The top indi
 
 BLE advertising stays on while the device has power and resumes after a browser disconnects. The color characteristics do not require pairing, so anyone nearby with a BLE client can change the colors. Set up BLE authentication in the firmware if that is not acceptable for your use.
 
-## Open the Page on Localhost
-
-From this project folder, run:
-
-```powershell
-py -m http.server 8765 --bind 127.0.0.1 --directory site
-```
-
-Open **http://127.0.0.1:8765/** on the same computer. The page shows a visual preview when no board is connected. On a supported browser, **Connect device** opens the Bluetooth chooser; after connecting, the color controls send values to the real board. The page uses only static files, so it can also be hosted on GitHub Pages over HTTPS. Put both `index.html` and `app.js` in the published site directory.
-
-## Publish on GitHub Pages
-
-This repository is configured to publish https://godcomplexx.github.io/Busy-Light/ from its default branch. The included workflow checks the browser connection logic before publishing the contents of `site` over HTTPS. Only the page files are uploaded as the Pages artifact; the firmware image and local backups are not part of the website. The workflow also supports a manual run from the **Actions** tab. If you fork the project, select **GitHub Actions** in **Settings → Pages → Build and deployment** for the fork.
-
-The GitHub Pages URL can be shared with anyone using the compatible browsers listed above. Each visitor needs internet access to load the page, then presses **Connect device** and chooses a nearby board with this firmware. Color commands travel over BLE, not over the visitor's internet connection. The website itself contains no per-device ID or password.
-
 ## Wiring
 
 The wiring below is for the **Seeed Studio XIAO ESP32-C6**. Its D0, D1, and D2 pins correspond to GPIO0, GPIO1, and GPIO2 ([Seeed pin map](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/)).
@@ -111,6 +92,22 @@ After `flash.py` reports successful verification, disconnect USB, connect the ci
 
 Successful flash verification proves that the board contains the built code and static data. On every newly assembled device, also check both switch positions and change both colors through the page.
 
+## Open the Page on Localhost
+
+From this project folder, run:
+
+```powershell
+py -m http.server 8765 --bind 127.0.0.1 --directory site
+```
+
+Open **http://127.0.0.1:8765/** on the same computer. The page shows a visual preview when no board is connected. On a supported browser, **Connect device** opens the Bluetooth chooser; after connecting, the color controls send values to the real board. The page uses only static files, so it can also be hosted on GitHub Pages over HTTPS. Put both `index.html` and `app.js` in the published site directory.
+
+## Publish on GitHub Pages
+
+This repository is configured to publish https://godcomplexx.github.io/Busy-Light/ from its default branch. The included workflow checks the browser connection logic before publishing the contents of `site` over HTTPS. Only the page files are uploaded as the Pages artifact; the firmware image and local backups are not part of the website. The workflow also supports a manual run from the **Actions** tab. If you fork the project, select **GitHub Actions** in **Settings → Pages → Build and deployment** for the fork.
+
+The GitHub Pages URL can be shared with anyone using the compatible browsers listed above. Each visitor needs internet access to load the page, then presses **Connect device** and chooses a nearby board with this firmware. Color commands travel over BLE, not over the visitor's internet connection. The website itself contains no per-device ID or password.
+
 ## Rebuild from Source
 
 The image was compiled with **Arduino ESP32 core 3.3.0**, board `esp32:esp32:XIAO_ESP32C6`, and **Adafruit NeoPixel 1.15.1**. Install [Arduino CLI](https://docs.arduino.cc/arduino-cli/installation), then install the pinned board package and NeoPixel library:
@@ -130,3 +127,17 @@ py build.py
 `build.py` checks that the BLE UUIDs in the sketch and web page match, remaps local user paths during compilation, checks that device-data partitions are blank, writes `firmware_deploy.bin`, and updates its SHA-256 in `flash.py` and this README. If Arduino CLI is not on `PATH`, pass its executable with `--arduino-cli`.
 
 To check the browser connection logic during development, run `node --test tests/site.test.mjs` with Node.js 20 or newer. This test does not require a physical ESP32-C6.
+
+## Project Files
+
+| Path | Purpose |
+| --- | --- |
+| [BusyLight/BusyLight.ino](BusyLight/BusyLight.ino) | Editable Arduino firmware. |
+| [firmware_deploy.bin](firmware_deploy.bin) | Ready-to-flash 4 MB image. |
+| [flash.py](flash.py) and [requirements.txt](requirements.txt) | Flash and verify a board with Python and esptool. |
+| [site/](site/) | Static Web Bluetooth controller. |
+| [build.py](build.py) | Rebuild the image from the sketch. |
+| [tests/site.test.mjs](tests/site.test.mjs) | Browser connection test. |
+| [.github/workflows/pages.yml](.github/workflows/pages.yml) | Test and publish the controller to GitHub Pages. |
+
+Firmware SHA-256: `701F81CAD26FCD519F9DD7E45266E4719494BAB231FEA078B0CAB5BADF4E3267`. `flash.py` checks this hash before writing. The image has blank device-data partitions and contains no saved settings copied from the original board.
