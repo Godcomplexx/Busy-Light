@@ -2,6 +2,8 @@
 
 This project contains an editable Arduino sketch, a complete firmware image, and a static Web Bluetooth controller for the **Seeed Studio XIAO ESP32-C6 with 4 MB of flash**. A compatible browser can find a nearby board, connect over Bluetooth Low Energy (BLE), and set the top indicator and five front LEDs independently. The color controls need no Wi-Fi network, account, or cable after the initial USB flash.
 
+**Live controller:** https://godcomplexx.github.io/Busy-Light/
+
 ## Files
 
 - `BusyLight/BusyLight.ino` — editable application source code.
@@ -71,7 +73,7 @@ Open **http://127.0.0.1:8765/** on the same computer. The page shows a visual pr
 
 ## Publish on GitHub Pages
 
-Put this project in a GitHub repository and push it to the repository's default branch. In **Settings → Pages → Build and deployment**, choose **GitHub Actions** as the source. The included workflow checks the browser connection logic before publishing the contents of `site` over HTTPS. Only the page files are uploaded as the Pages artifact; the firmware image and local backups are not part of the website. The workflow also supports a manual run from the **Actions** tab.
+This repository is configured to publish https://godcomplexx.github.io/Busy-Light/ from its default branch. The included workflow checks the browser connection logic before publishing the contents of `site` over HTTPS. Only the page files are uploaded as the Pages artifact; the firmware image and local backups are not part of the website. The workflow also supports a manual run from the **Actions** tab. If you fork the project, select **GitHub Actions** in **Settings → Pages → Build and deployment** for the fork.
 
 The GitHub Pages URL can be shared with anyone using the compatible browsers listed above. Each visitor needs internet access to load the page, then presses **Connect device** and chooses a nearby board with this firmware. Color commands travel over BLE, not over the visitor's internet connection. The website itself contains no per-device ID or password.
 
@@ -131,4 +133,4 @@ To check the browser connection logic during development, run `node --test tests
 
 This image was compiled afresh from the included sketch. Its NVS and SPIFFS partitions are blank. At runtime, NVS stores the selected LED colors and system radio data. Source-path remapping was used during compilation so the Windows account name is not embedded. A static check found no original-board MAC address or user path in the release image. The original device dump and photographs are stored separately and are **not** part of this folder.
 
-On November 12, 2026, the BLE firmware was tested on the original ESP32-C6: a Windows BLE client read and wrote both colors, a second connection succeeded, and the user confirmed that changing a color from the localhost page changed the light. The audited image was then rebuilt, flashed, and verified on the same board. Its prior NVS settings were restored from a separate backup. After the final flash, the user confirmed that the localhost page read the restored top color `#3300FF` and front color `#AC2020` and still changed both lights. Flashing a second physical board and the published GitHub Pages URL have not yet been tested.
+On November 12, 2026, the BLE firmware was tested on the original ESP32-C6: a Windows BLE client read and wrote both colors, a second connection succeeded, and the user confirmed that changing a color from the localhost page changed the light. The audited image was then rebuilt, flashed, and verified on the same board. Its prior NVS settings were restored from a separate backup. After the final flash, the user confirmed that the localhost page read the restored top color `#3300FF` and front color `#AC2020` and still changed both lights. The published GitHub Pages URL was checked to serve the HTML and JavaScript over HTTPS. Bluetooth control from that URL and flashing a second physical board have not yet been tested.
